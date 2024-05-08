@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Software Development Effort Estimator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.7/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/vue@next"></script>
+</head>
+
+<body class="bg-gray-200">
+    <div id="app" class="flex items-center justify-center min-h-screen">
+        <div class="w-full max-w-md bg-white rounded-lg shadow-md p-6">
+            <h1 class="text-2xl font-bold mb-6">Software Development Effort Estimator</h1>
+            <form>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2" for="teamExp">Team Experience (in years)</label>
+                    <input v-model.number="teamExp"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        id="teamExp" type="number" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2" for="managerExp">Manager Experience (in
+                        years)</label>
+                    <input v-model.number="managerExp"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        id="managerExp" type="number" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2" for="yearEnd">Year-End (e.g. 85 for 1985)</label>
+                    <input v-model.number="yearEnd"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        id="yearEnd" type="number" min="0" max="1" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2" for="length">Length of Project (in months)</label>
+                    <input v-model.number="length"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        id="length" type="number" required>
+                </div>
+                <button @click.prevent="predictEffort"
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    type="submit">Estimate Effort</button>
+            </form>
+            <div v-if="result" class="mt-6">
+                <p class="text-center text-2xl font-bold mb-2">{{ result }}</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js" integrity="sha512-uMtXmF28A2Ab/JJO2t/vYhlaa/3ahUOgj1Zf27M5rOo8/+fcTUVH0/E0ll68njmjrLqOBjXM3V9NiPFL5ywWPQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://unpkg.com/vue@2.7.8/dist/vue.js"></script>
+    <script>
+        const app = new Vue({
+            el: "#app",
+            data() {
+                return {
+                    teamExp: null,
+                    managerExp: null,
+                    yearEnd: null,
+                    length: null,
+                    result: null,
+                };
+            },
+
+            methods: {
+                async predictEffort() {
+                    try {
+                        const inputData = {
+                            TeamExp: this.teamExp,
+                            ManagerExp: this.managerExp,
+                            YearEnd: this.yearEnd,
+                            Length: this.length
+                        };
+    
+                        const response = await axios.post('http://127.0.0.1:5000/predict', inputData);
+
+                        this.result = `The effort required for the project is ${response.data.prediction[0].toFixed(2)} person-months.`;
+                    } catch (error) {
+                        console.error(error);
+                        this.result = 'Error: Invalid input data';
+                    }
+                }
+            }
+
+        }
+        )
+
+    </script>
+</body>
+
+</html>
